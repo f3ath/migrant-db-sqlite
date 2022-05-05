@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install SQLite
-        run: apt-get update && apt-get install sqlite3 libsqlite3-dev
+        run: apt-get update -y && apt-get install sqlite3 libsqlite3-dev -y
       - name: Print Dart version
         run: dart --version
       - name: Install dependencies
