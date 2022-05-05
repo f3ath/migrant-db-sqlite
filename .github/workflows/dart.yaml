@@ -1,0 +1,27 @@
+name: Dart CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  buld:
+    runs-on: ubuntu-latest
+    container:
+      image: dart:latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Print Dart version
+        run: dart --version
+      - name: Install dependencies
+        run: dart pub get
+      - name: Formatter
+        run: dart format --output none --set-exit-if-changed example lib test
+      - name: Analyzer
+        run: dart analyze --fatal-infos --fatal-warnings
+      - name: Tests
+        run: dart test --coverage=coverage
+      - name: Coverage
+        run: dart run coverage:format_coverage -l -c -i coverage --report-on=lib --packages=.packages | dart run check_coverage:check_coverage
