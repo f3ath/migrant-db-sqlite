@@ -31,7 +31,7 @@ void main() {
       'bar': 'world',
     });
     expect(
-        await connection.query('test;'),
+        await connection.query('test'),
         equals([
           {'id': '0000', 'foo': 'hello', 'bar': 'world'}
         ]));
