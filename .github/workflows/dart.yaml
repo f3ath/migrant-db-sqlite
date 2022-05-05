@@ -13,12 +13,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Install SQLite
+        run: apt-get update && apt-get install sqlite3 libsqlite3-dev
       - name: Print Dart version
         run: dart --version
       - name: Install dependencies
         run: dart pub get
-      - name: Install SQLite
-        run: apt-get install sqlite3 libsqlite3-dev
       - name: Formatter
         run: dart format --output none --set-exit-if-changed example lib test
       - name: Analyzer
