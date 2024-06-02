@@ -1,8 +1,7 @@
 import 'package:migrant/migrant.dart';
 import 'package:migrant/testing.dart';
 import 'package:migrant_db_sqlite/migrant_db_sqlite.dart';
-import 'package:sqflite_common/sqlite_api.dart' hide Database;
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' hide Database;
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
@@ -14,7 +13,7 @@ void main() {
       '02': 'alter table test add column bar text;'
     });
 
-    var connection =
+    final connection =
         await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
 
     final gateway = SQLiteGateway(connection);
@@ -40,7 +39,7 @@ void main() {
   });
 
   test('Invalid migrations', () async {
-    var connection =
+    final connection =
         await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
     final gateway = SQLiteGateway(connection);
     await gateway.dropMigrations();

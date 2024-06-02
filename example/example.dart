@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:migrant/migrant.dart';
 import 'package:migrant/testing.dart';
 import 'package:migrant_db_sqlite/migrant_db_sqlite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' hide Database;
 
 Future<void> main() async {
   // These are the migrations. We are using a simple in-memory source,
@@ -20,7 +20,7 @@ Future<void> main() async {
     sqfliteFfiInit();
   }
 
-  print("Database path:" + await databaseFactoryFfi.getDatabasesPath());
+  print("Database path:${await databaseFactoryFfi.getDatabasesPath()}");
 
   // The SQLite connection. We're using a local file.
   var connection = await databaseFactoryFfi.openDatabase('example.db');
