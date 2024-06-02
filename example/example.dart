@@ -20,7 +20,7 @@ Future<void> main() async {
     sqfliteFfiInit();
   }
 
-  print("Database path:" + await databaseFactoryFfi.getDatabasesPath());
+  print("Database path:${await databaseFactoryFfi.getDatabasesPath()}");
 
   // The SQLite connection. We're using a local file.
   var connection = await databaseFactoryFfi.openDatabase('example.db');
