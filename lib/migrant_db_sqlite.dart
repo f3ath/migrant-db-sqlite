@@ -6,10 +6,34 @@ class SQLiteGateway implements DatabaseGateway {
       : _table = '${tablePrefix}_v$_version';
 
   /// Internal version.
-  static const _version = '1';
+  static const _version = 1;
 
   final sqlite.Database _db;
   final String _table;
+
+  @override
+  Future<void> initialize(Migration migration) async {
+    await _init();
+    await _db.transaction((ctx) async {
+      final history = await _apply(migration, ctx);
+      if (history.length != 1 || history.first != migration.version) {
+        throw RaceCondition('Unexpected history: $history');
+      }
+    });
+  }
+
+  @override
+  Future<void> upgrade(String version, Migration migration) async {
+    await _init();
+    await _db.transaction((ctx) async {
+      final history = await _apply(migration, ctx);
+      if (history.length < 2 ||
+          history.last != migration.version ||
+          history[history.length - 2] != version) {
+        throw RaceCondition('Unexpected history: $history');
+      }
+    });
+  }
 
   @override
   Future<String?> currentVersion() async {
@@ -18,21 +42,31 @@ class SQLiteGateway implements DatabaseGateway {
     return result.first['v'] as String?;
   }
 
-  @override
-  Future<void> apply(Migration migration) async {
-    await _init();
-    await _db.transaction((ctx) async {
-      await ctx.insert(_table, {
-        'version': migration.version,
-        'created_at': DateTime.now().toIso8601String()
-      });
-      await ctx.execute(migration.statement);
-    });
-  }
+  Future<void> _register(String version, sqlite.Transaction tx) => tx.insert(
+      _table,
+      {'version': version, 'created_at': DateTime.now().toIso8601String()});
 
-  /// Drops the migrations table.
-  Future<void> dropMigrations() => _db.execute('drop table if exists $_table;');
+  /// Applies the migration and returns the applied versions, ascending.
+  Future<List<String>> _apply(
+      Migration migration, sqlite.Transaction tx) async {
+    for (final statement in migration.statements) {
+      await tx.execute(statement);
+    }
+    await _register(migration.version, tx);
+    final result = await tx.query(_table, orderBy: 'version asc');
+    return result.map((row) => row['version'] as String).toList();
+  }
 
   Future<void> _init() => _db.execute(
       'create table if not exists $_table (version text primary key, created_at text not null);');
+}
+
+/// Thrown when the gateway detects a race condition during migration.
+class RaceCondition implements Exception {
+  const RaceCondition(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }
